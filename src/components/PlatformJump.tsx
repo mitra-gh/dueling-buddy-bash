@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { User, Flag } from 'lucide-react';
+import { Flag } from 'lucide-react';
 
 interface PlatformJumpProps {
   onGameEnd: (winner: 1 | 2) => void;
@@ -20,24 +20,29 @@ const PlatformJump: React.FC<PlatformJumpProps> = ({ onGameEnd }) => {
   const GRAVITY = 0.8;
   const JUMP_FORCE = -15;
   const MOVE_SPEED = 5;
-  const GOAL_X = 1100;
   const GROUND_Y = 500;
 
-  // Platform definitions
+  // Redesigned platform layout for more varied and challenging gameplay
   const platforms = [
-    { x: 200, y: 450, width: 100, height: 20 },
-    { x: 350, y: 400, width: 100, height: 20 },
-    { x: 500, y: 350, width: 100, height: 20 },
-    { x: 650, y: 300, width: 100, height: 20 },
-    { x: 800, y: 250, width: 100, height: 20 },
-    { x: 950, y: 200, width: 100, height: 20 },
-    { x: 1050, y: 150, width: 150, height: 20 }, // Goal platform
+    { x: 150, y: 450, width: 80, height: 15 },
+    { x: 280, y: 380, width: 70, height: 15 },
+    { x: 400, y: 320, width: 90, height: 15 },
+    { x: 250, y: 250, width: 80, height: 15 },
+    { x: 450, y: 200, width: 70, height: 15 },
+    { x: 600, y: 280, width: 85, height: 15 },
+    { x: 750, y: 220, width: 75, height: 15 },
+    { x: 580, y: 150, width: 80, height: 15 },
+    { x: 850, y: 160, width: 70, height: 15 },
+    { x: 980, y: 120, width: 120, height: 15 }, // Goal platform
   ];
+
+  // Goal platform is the last one
+  const goalPlatform = platforms[platforms.length - 1];
 
   const checkCollision = (playerPos: { x: number; y: number }, velocity: { x: number; y: number }) => {
     const playerBottom = playerPos.y + 30;
     const playerLeft = playerPos.x;
-    const playerRight = playerPos.x + 20;
+    const playerRight = playerPos.x + 30;
     
     // Check ground collision
     if (playerBottom >= GROUND_Y && velocity.y >= 0) {
@@ -58,6 +63,19 @@ const PlatformJump: React.FC<PlatformJumpProps> = ({ onGameEnd }) => {
     }
     
     return { collision: false, y: playerPos.y };
+  };
+
+  const isOnGoalPlatform = (playerPos: { x: number; y: number }) => {
+    const playerBottom = playerPos.y + 30;
+    const playerLeft = playerPos.x;
+    const playerRight = playerPos.x + 30;
+    
+    return (
+      playerRight > goalPlatform.x &&
+      playerLeft < goalPlatform.x + goalPlatform.width &&
+      playerBottom >= goalPlatform.y &&
+      playerBottom <= goalPlatform.y + goalPlatform.height + 5
+    );
   };
 
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
@@ -115,7 +133,7 @@ const PlatformJump: React.FC<PlatformJumpProps> = ({ onGameEnd }) => {
           const newPos = { x: prev.x + newVelX, y: prev.y + newVelY };
           
           // Keep player in bounds
-          newPos.x = Math.max(0, Math.min(1200, newPos.x));
+          newPos.x = Math.max(0, Math.min(1170, newPos.x));
           
           const collision = checkCollision(newPos, { x: newVelX, y: newVelY });
           if (collision.collision) {
@@ -142,7 +160,7 @@ const PlatformJump: React.FC<PlatformJumpProps> = ({ onGameEnd }) => {
           const newPos = { x: prev.x + newVelX, y: prev.y + newVelY };
           
           // Keep player in bounds
-          newPos.x = Math.max(0, Math.min(1200, newPos.x));
+          newPos.x = Math.max(0, Math.min(1170, newPos.x));
           
           const collision = checkCollision(newPos, { x: newVelX, y: newVelY });
           if (collision.collision) {
@@ -176,16 +194,16 @@ const PlatformJump: React.FC<PlatformJumpProps> = ({ onGameEnd }) => {
     return () => clearInterval(timer);
   }, [countdown, gameStarted]);
 
-  // Check for winner
+  // Check for winner - must be ON the goal platform
   useEffect(() => {
-    if (player1Position.x >= GOAL_X && !winner) {
+    if (isOnGoalPlatform(player1Position) && !winner) {
       setWinner(1);
       onGameEnd(1);
-    } else if (player2Position.x >= GOAL_X && !winner) {
+    } else if (isOnGoalPlatform(player2Position) && !winner) {
       setWinner(2);
       onGameEnd(2);
     }
-  }, [player1Position.x, player2Position.x, winner, onGameEnd]);
+  }, [player1Position, player2Position, winner, onGameEnd]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-900 via-blue-900 to-purple-900 overflow-hidden relative">
@@ -229,48 +247,46 @@ const PlatformJump: React.FC<PlatformJumpProps> = ({ onGameEnd }) => {
         {platforms.map((platform, index) => (
           <div
             key={index}
-            className={`absolute rounded-lg ${index === platforms.length - 1 ? 'bg-yellow-500 border-2 border-yellow-300' : 'bg-gray-700 border-2 border-gray-500'}`}
+            className={`absolute rounded-lg ${index === platforms.length - 1 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600 border-2 border-yellow-300 shadow-lg shadow-yellow-400/50' : 'bg-gradient-to-r from-gray-600 to-gray-800 border-2 border-gray-500'}`}
             style={{
               left: platform.x,
               top: platform.y,
               width: platform.width,
               height: platform.height,
             }}
-          ></div>
+          >
+            {index === platforms.length - 1 && (
+              <div className="absolute -top-8 left-1/2 transform -translate-x-1/2">
+                <Flag className="w-6 h-6 text-yellow-300 animate-pulse" />
+              </div>
+            )}
+          </div>
         ))}
 
-        {/* Goal Flag */}
+        {/* Player 1 - Blue Ninja */}
         <div
-          className="absolute flex items-center justify-center"
-          style={{ left: GOAL_X + 50, top: 100 }}
-        >
-          <Flag className="w-12 h-12 text-yellow-400 animate-pulse" />
-        </div>
-
-        {/* Player 1 */}
-        <div
-          className="absolute transition-all duration-75 ease-linear"
+          className="absolute transition-all duration-75 ease-linear text-3xl"
           style={{
             left: player1Position.x,
             top: player1Position.y,
-            width: 20,
+            width: 30,
             height: 30,
           }}
         >
-          <User className="w-5 h-7 text-blue-400 drop-shadow-lg" />
+          🥷
         </div>
 
-        {/* Player 2 */}
+        {/* Player 2 - Red Ninja */}
         <div
-          className="absolute transition-all duration-75 ease-linear"
+          className="absolute transition-all duration-75 ease-linear text-3xl"
           style={{
             left: player2Position.x,
             top: player2Position.y,
-            width: 20,
+            width: 30,
             height: 30,
           }}
         >
-          <User className="w-5 h-7 text-green-400 drop-shadow-lg" />
+          🧑‍🦲
         </div>
       </div>
 
@@ -278,11 +294,11 @@ const PlatformJump: React.FC<PlatformJumpProps> = ({ onGameEnd }) => {
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">
         <div className="flex gap-8 text-white text-center">
           <div className="bg-blue-900/80 p-4 rounded-lg">
-            <h3 className="text-lg font-bold text-blue-400 mb-2">Player 1</h3>
+            <h3 className="text-lg font-bold text-blue-400 mb-2">Player 1 🥷</h3>
             <p className="text-sm">A/D: Move • W: Jump</p>
           </div>
-          <div className="bg-green-900/80 p-4 rounded-lg">
-            <h3 className="text-lg font-bold text-green-400 mb-2">Player 2</h3>
+          <div className="bg-red-900/80 p-4 rounded-lg">
+            <h3 className="text-lg font-bold text-red-400 mb-2">Player 2 🧑‍🦲</h3>
             <p className="text-sm">←/→: Move • ↑: Jump</p>
           </div>
         </div>
