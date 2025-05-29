@@ -2,9 +2,9 @@
 import React, { useState } from 'react';
 import GameMenu from '../components/GameMenu';
 import RacingGame from '../components/RacingGame';
-import ButtonMasher from '../components/ButtonMasher';
+import PlatformJump from '../components/PlatformJump';
 
-type GameState = 'menu' | 'racing' | 'buttonmasher';
+type GameState = 'menu' | 'racing' | 'platformjump';
 
 const Index = () => {
   const [currentGame, setCurrentGame] = useState<GameState>('menu');
@@ -45,8 +45,8 @@ const Index = () => {
       {currentGame === 'racing' && (
         <RacingGame onGameEnd={handleGameEnd} />
       )}
-      {currentGame === 'buttonmasher' && (
-        <ButtonMasher onGameEnd={handleGameEnd} />
+      {currentGame === 'platformjump' && (
+        <PlatformJump onGameEnd={handleGameEnd} />
       )}
     </div>
   );

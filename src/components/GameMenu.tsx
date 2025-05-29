@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { Car, Zap, RotateCcw } from 'lucide-react';
+import { Car, User, RotateCcw } from 'lucide-react';
 
 interface GameMenuProps {
-  onGameSelect: (game: 'racing' | 'buttonmasher') => void;
+  onGameSelect: (game: 'racing' | 'platformjump') => void;
   player1Score: number;
   player2Score: number;
   onResetScores: () => void;
@@ -72,18 +72,18 @@ const GameMenu: React.FC<GameMenuProps> = ({
             </div>
           </button>
 
-          {/* Button Masher */}
+          {/* Platform Jump */}
           <button
-            onClick={() => onGameSelect('buttonmasher')}
+            onClick={() => onGameSelect('platformjump')}
             className="group relative bg-gradient-to-br from-cyan-500 to-blue-600 p-8 rounded-3xl shadow-2xl border-4 border-white/20 hover:border-white/40 transform hover:scale-105 transition-all duration-300 hover:shadow-cyan-500/25"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-3xl blur group-hover:blur-sm transition-all"></div>
             <div className="relative z-10">
-              <Zap className="w-16 h-16 text-white mx-auto mb-4 group-hover:animate-pulse" />
-              <h3 className="text-2xl font-bold text-white mb-2">BUTTON MASHER</h3>
-              <p className="text-white/80">Press as fast as you can!</p>
+              <User className="w-16 h-16 text-white mx-auto mb-4 group-hover:animate-bounce" />
+              <h3 className="text-2xl font-bold text-white mb-2">PLATFORM JUMP</h3>
+              <p className="text-white/80">Jump to reach the goal!</p>
               <div className="mt-4 text-sm text-white/60">
-                Player 1: SPACE • Player 2: ENTER
+                Player 1: A/D/W • Player 2: ←/→/↑
               </div>
             </div>
           </button>
