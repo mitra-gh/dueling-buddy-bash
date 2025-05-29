@@ -1,12 +1,53 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React, { useState } from 'react';
+import GameMenu from '../components/GameMenu';
+import RacingGame from '../components/RacingGame';
+import ButtonMasher from '../components/ButtonMasher';
+
+type GameState = 'menu' | 'racing' | 'buttonmasher';
 
 const Index = () => {
+  const [currentGame, setCurrentGame] = useState<GameState>('menu');
+  const [player1Score, setPlayer1Score] = useState(0);
+  const [player2Score, setPlayer2Score] = useState(0);
+
+  const handleGameSelect = (game: GameState) => {
+    setCurrentGame(game);
+  };
+
+  const handleGameEnd = (winner: 1 | 2) => {
+    if (winner === 1) {
+      setPlayer1Score(prev => prev + 1);
+    } else {
+      setPlayer2Score(prev => prev + 1);
+    }
+    
+    setTimeout(() => {
+      setCurrentGame('menu');
+    }, 3000);
+  };
+
+  const resetScores = () => {
+    setPlayer1Score(0);
+    setPlayer2Score(0);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 overflow-hidden">
+      {currentGame === 'menu' && (
+        <GameMenu 
+          onGameSelect={handleGameSelect}
+          player1Score={player1Score}
+          player2Score={player2Score}
+          onResetScores={resetScores}
+        />
+      )}
+      {currentGame === 'racing' && (
+        <RacingGame onGameEnd={handleGameEnd} />
+      )}
+      {currentGame === 'buttonmasher' && (
+        <ButtonMasher onGameEnd={handleGameEnd} />
+      )}
     </div>
   );
 };
