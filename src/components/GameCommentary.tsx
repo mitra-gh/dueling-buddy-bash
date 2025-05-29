@@ -15,6 +15,7 @@ const GameCommentary: React.FC<GameCommentaryProps> = ({
 }) => {
   const [commentary, setCommentary] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!gameStarted || winner) return;
@@ -22,6 +23,7 @@ const GameCommentary: React.FC<GameCommentaryProps> = ({
     const fetchCommentary = async () => {
       try {
         setIsLoading(true);
+        setError(null);
         const response = await fetch("http://localhost:3001/api/chat", {
           method: "POST",
           headers: {
@@ -46,10 +48,17 @@ const GameCommentary: React.FC<GameCommentaryProps> = ({
           }),
         });
 
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to fetch commentary");
+        }
+
         const data = await response.json();
         setCommentary(data.content);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching commentary:", error);
+        setError(error.message || "Failed to fetch commentary");
+        setCommentary(""); // Clear any existing commentary
       } finally {
         setIsLoading(false);
       }
@@ -77,6 +86,8 @@ const GameCommentary: React.FC<GameCommentaryProps> = ({
               style={{ animationDelay: "0.4s" }}
             ></div>
           </div>
+        ) : error ? (
+          <p className="text-sm text-red-400">{error}</p>
         ) : (
           <p className="text-lg font-bold animate-pulse">{commentary}</p>
         )}

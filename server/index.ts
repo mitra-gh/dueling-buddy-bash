@@ -13,6 +13,18 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// Check for OpenAI API key
+if (!process.env.OPENAI_API_KEY) {
+  console.error(
+    "Error: OPENAI_API_KEY is not set in the environment variables"
+  );
+  console.error(
+    "Please create a .env file in the root directory with your OpenAI API key:"
+  );
+  console.error("OPENAI_API_KEY=your-api-key-here");
+  process.exit(1);
+}
+
 // Initialize OpenAI
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -34,17 +46,39 @@ app.post("/api/chat", async (req, res) => {
     });
 
     res.json(completion.choices[0].message);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error calling OpenAI:", error);
-    res.status(500).json({ error: "Error processing your request" });
+
+    // Provide more specific error messages
+    if (error.response?.status === 401) {
+      return res.status(401).json({
+        error:
+          "Invalid API key. Please check your OpenAI API key in the .env file.",
+      });
+    }
+
+    if (error.response?.status === 429) {
+      return res.status(429).json({
+        error: "Rate limit exceeded. Please try again later.",
+      });
+    }
+
+    res.status(500).json({
+      error: "Error processing your request",
+      details: error.message,
+    });
   }
 });
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok" });
+  res.json({
+    status: "ok",
+    openaiConfigured: !!process.env.OPENAI_API_KEY,
+  });
 });
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
+  console.log(`OpenAI API configured: ${!!process.env.OPENAI_API_KEY}`);
 });
