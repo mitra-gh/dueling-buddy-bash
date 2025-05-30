@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import GameMenu from '../components/GameMenu';
 import RacingGame from '../components/RacingGame';
 import PlatformJump from '../components/PlatformJump';
+import LudoGame from '../components/LudoGame';
 
-type GameState = 'menu' | 'racing' | 'platformjump';
+type GameState = 'menu' | 'racing' | 'platformjump' | 'ludo';
 
 const Index = () => {
   const [currentGame, setCurrentGame] = useState<GameState>('menu');
@@ -47,6 +47,9 @@ const Index = () => {
       )}
       {currentGame === 'platformjump' && (
         <PlatformJump onGameEnd={handleGameEnd} />
+      )}
+      {currentGame === 'ludo' && (
+        <LudoGame onGameEnd={() => setCurrentGame('menu')} />
       )}
     </div>
   );

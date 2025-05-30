@@ -1,9 +1,8 @@
-
 import React from 'react';
-import { Car, User, RotateCcw } from 'lucide-react';
+import { Car, User, RotateCcw, Dice6 } from 'lucide-react';
 
 interface GameMenuProps {
-  onGameSelect: (game: 'racing' | 'platformjump') => void;
+  onGameSelect: (game: 'racing' | 'platformjump' | 'ludo') => void;
   player1Score: number;
   player2Score: number;
   onResetScores: () => void;
@@ -31,11 +30,11 @@ const GameMenu: React.FC<GameMenuProps> = ({
           PARTY
         </h1>
         <h2 className="text-2xl md:text-3xl font-bold text-white mb-12 animate-fade-in">
-          Two Player Games
+          Multiplayer Games
         </h2>
 
         {/* Score Display */}
-        <div className="flex justify-center items-center gap-8 mb-12">
+        <div className="flex items-center justify-center gap-4 mb-12">
           <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-6 rounded-2xl shadow-2xl border-2 border-white/20">
             <h3 className="text-xl font-bold text-white mb-2">Player 1</h3>
             <div className="text-4xl font-bold text-yellow-300">{player1Score}</div>
@@ -55,7 +54,7 @@ const GameMenu: React.FC<GameMenuProps> = ({
         </div>
 
         {/* Game Selection */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {/* Racing Game */}
           <button
             onClick={() => onGameSelect('racing')}
@@ -87,11 +86,27 @@ const GameMenu: React.FC<GameMenuProps> = ({
               </div>
             </div>
           </button>
+
+          {/* Ludo Game */}
+          <button
+            onClick={() => onGameSelect('ludo')}
+            className="group relative bg-gradient-to-br from-purple-500 to-indigo-600 p-8 rounded-3xl shadow-2xl border-4 border-white/20 hover:border-white/40 transform hover:scale-105 transition-all duration-300 hover:shadow-purple-500/25"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-400/20 to-indigo-500/20 rounded-3xl blur group-hover:blur-sm transition-all"></div>
+            <div className="relative z-10">
+              <Dice6 className="w-16 h-16 text-white mx-auto mb-4 group-hover:animate-bounce" />
+              <h3 className="text-2xl font-bold text-white mb-2">LUDO</h3>
+              <p className="text-white/80">Classic board game for 4 players!</p>
+              <div className="mt-4 text-sm text-white/60">
+                Roll dice and move your pieces
+              </div>
+            </div>
+          </button>
         </div>
 
         {/* Instructions */}
         <div className="mt-12 text-white/60 text-center max-w-2xl mx-auto">
-          <p className="text-lg">Choose a game and compete against your friend!</p>
+          <p className="text-lg">Choose a game and compete with your friends!</p>
           <p className="text-sm mt-2">First to win 5 rounds is the champion!</p>
         </div>
       </div>

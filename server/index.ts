@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import OpenAI from "openai";
@@ -13,72 +13,54 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Check for OpenAI API key
-if (!process.env.OPENAI_API_KEY) {
-  console.error(
-    "Error: OPENAI_API_KEY is not set in the environment variables"
-  );
-  console.error(
-    "Please create a .env file in the root directory with your OpenAI API key:"
-  );
-  console.error("OPENAI_API_KEY=your-api-key-here");
-  process.exit(1);
-}
-
-// Initialize OpenAI
+// Initialize OpenAI configuration
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  //baseURL: "https://api.metisai.ir/openai/v1",
+  apiKey: process.env.OPENAI_API_KEY || "your-api-key-here",
+});
+
+// Add request logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  next();
 });
 
 // OpenAI endpoint
-app.post("/api/chat", async (req, res) => {
+app.post("/api/chat", async (req: Request, res: Response) => {
   try {
+    console.log("Received chat request with body:", req.body);
     const { messages } = req.body;
 
     if (!messages || !Array.isArray(messages)) {
+      console.log("Invalid request - messages array is required");
       return res.status(400).json({ error: "Messages array is required" });
     }
 
+    console.log("Calling OpenAI API...");
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: messages,
+      stream: false,
+      temperature: 0.7,
+      max_tokens: 1000
     });
 
-    res.json(completion.choices[0].message);
-  } catch (error: any) {
+    console.log("Received response from OpenAI");
+    return res.json(completion);
+  } catch (error) {
     console.error("Error calling OpenAI:", error);
-
-    // Provide more specific error messages
-    if (error.response?.status === 401) {
-      return res.status(401).json({
-        error:
-          "Invalid API key. Please check your OpenAI API key in the .env file.",
-      });
-    }
-
-    if (error.response?.status === 429) {
-      return res.status(429).json({
-        error: "Rate limit exceeded. Please try again later.",
-      });
-    }
-
-    res.status(500).json({
-      error: "Error processing your request",
-      details: error.message,
-    });
+    return res.status(500).json({ error: "Failed to get response from OpenAI" });
   }
 });
 
 // Health check endpoint
-app.get("/api/health", (req, res) => {
+app.get("/api/health", (req: Request, res: Response) => {
   res.json({
     status: "ok",
-    openaiConfigured: !!process.env.OPENAI_API_KEY,
+    openaiConfigured: !!openai
   });
 });
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
-  console.log(`OpenAI API configured: ${!!process.env.OPENAI_API_KEY}`);
+  console.log("OpenAI configured:", !!openai);
 });

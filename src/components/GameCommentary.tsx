@@ -54,7 +54,7 @@ const GameCommentary: React.FC<GameCommentaryProps> = ({
         }
 
         const data = await response.json();
-        setCommentary(data.content);
+        setCommentary(data.choices[0].message.content);
       } catch (error: any) {
         console.error("Error fetching commentary:", error);
         setError(error.message || "Failed to fetch commentary");
